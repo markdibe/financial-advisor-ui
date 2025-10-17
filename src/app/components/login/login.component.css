@@ -1,0 +1,114 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 48px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 8px 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #718096;
+    margin: 0 0 40px 0;
+}
+
+.login-content {
+    margin-top: 32px;
+}
+
+.google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap: 12px;
+}
+
+.google-login-btn:hover:not(:disabled) {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.google-login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.error-message {
+    margin-top: 20px;
+    padding: 12px;
+    background: #fed7d7;
+    border: 1px solid #fc8181;
+    border-radius: 8px;
+    color: #c53030;
+    font-size: 14px;
+}
+
+.info-text {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.info-text p {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 0 0 12px 0;
+}
+
+.info-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-text li {
+    font-size: 14px;
+    color: #718096;
+    padding: 6px 0;
+    padding-left: 24px;
+    position: relative;
+}
+
+.info-text li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #48bb78;
+    font-weight: bold;
+}
