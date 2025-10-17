@@ -1,42 +1,125 @@
 <div class="chat-container">
+    <!-- Header -->
     <div class="chat-header">
-        <h1>Financial Advisor AI</h1>
-        <div class="user-info">
+        <div class="header-left">
+            <h1>Financial Advisor AI</h1>
+            <span class="subtitle">Ask me anything about your clients</span>
+        </div>
+        <div class="header-right">
             <span class="user-email">{{ currentUser?.email }}</span>
-            <button class="logout-btn" (click)="logout()">Logout</button>
+            <button class="btn-clear" (click)="clearChat()" title="Clear chat">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+            <button class="btn-logout" (click)="logout()">Logout</button>
         </div>
     </div>
 
-    <div class="chat-content">
-        <div class="welcome-message">
-            <h2>✅ Authentication Successful!</h2>
-            <p>Welcome, {{ currentUser?.email }}</p>
+    <!-- Messages Container -->
+    <div class="messages-container" #messagesContainer>
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading chat history...</p>
+        </div>
 
-            <div class="auth-status">
-                <div class="status-item">
-                    <span class="status-label">Google Connected:</span>
-                    <span class="status-value" [class.connected]="currentUser?.hasGoogleAuth">
-            {{ currentUser?.hasGoogleAuth ? "✓ Yes" : "✗ No" }}
-          </span>
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && messages.length === 0" class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+            <h3>Start a conversation</h3>
+            <p>Ask me about your clients, schedule meetings, or manage your tasks.</p>
+            <div class="example-prompts">
+                <button class="example-prompt" (click)="newMessage = 'Who are my recent clients?'; sendMessage()">
+          Who are my recent clients?
+        </button>
+                <button class="example-prompt" (click)="
+            newMessage = 'What meetings do I have this week?'; sendMessage()
+          ">
+          What meetings do I have this week?
+        </button>
+                <button class="example-prompt" (click)="
+            newMessage = 'Help me draft an email to a client'; sendMessage()
+          ">
+          Help me draft an email
+        </button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div *ngFor="let message of messages" class="message" [class.user-message]="message.role === 'user'" [class.assistant-message]="message.role === 'assistant'">
+            <div class="message-avatar">
+                <span *ngIf="message.role === 'user'">👤</span>
+                <span *ngIf="message.role === 'assistant'">🤖</span>
+            </div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-role">{{
+            message.role === "user" ? "You" : "AI Assistant"
+          }}</span>
+                    <span class="message-time">{{
+            message.createdAt | date : "short"
+          }}</span>
                 </div>
-                <div class="status-item">
-                    <span class="status-label">HubSpot Connected:</span>
-                    <span class="status-value" [class.connected]="currentUser?.hasHubspotAuth">
-            {{ currentUser?.hasHubspotAuth ? "✓ Yes" : "✗ No" }}
-          </span>
+                <div class="message-text">{{ message.content }}</div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div *ngIf="isSending" class="message assistant-message typing-indicator">
+            <div class="message-avatar">
+                <span>🤖</span>
+            </div>
+            <div class="message-content">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="next-steps">
-                <h3>Phase 1b Complete! 🎉</h3>
-                <p>Next phases will add:</p>
-                <ul>
-                    <li>HubSpot integration</li>
-                    <li>Chat interface</li>
-                    <li>AI agent capabilities</li>
-                    <li>Email and calendar automation</li>
-                </ul>
-            </div>
+    <!-- Input Area -->
+    <div class="input-container">
+        <div class="input-wrapper">
+            <textarea [(ngModel)]="newMessage" (keypress)="onKeyPress($event)" placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)" rows="1" [disabled]="isSending" class="message-input">
+      </textarea>
+            <button class="send-button" (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending" [class.sending]="isSending">
+        <svg
+          *ngIf="!isSending"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <div *ngIf="isSending" class="button-spinner"></div>
+      </button>
         </div>
     </div>
 </div>
