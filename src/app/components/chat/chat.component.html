@@ -1,0 +1,42 @@
+<div class="chat-container">
+    <div class="chat-header">
+        <h1>Financial Advisor AI</h1>
+        <div class="user-info">
+            <span class="user-email">{{ currentUser?.email }}</span>
+            <button class="logout-btn" (click)="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="chat-content">
+        <div class="welcome-message">
+            <h2>✅ Authentication Successful!</h2>
+            <p>Welcome, {{ currentUser?.email }}</p>
+
+            <div class="auth-status">
+                <div class="status-item">
+                    <span class="status-label">Google Connected:</span>
+                    <span class="status-value" [class.connected]="currentUser?.hasGoogleAuth">
+            {{ currentUser?.hasGoogleAuth ? "✓ Yes" : "✗ No" }}
+          </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">HubSpot Connected:</span>
+                    <span class="status-value" [class.connected]="currentUser?.hasHubspotAuth">
+            {{ currentUser?.hasHubspotAuth ? "✓ Yes" : "✗ No" }}
+          </span>
+                </div>
+            </div>
+
+            <div class="next-steps">
+                <h3>Phase 1b Complete! 🎉</h3>
+                <p>Next phases will add:</p>
+                <ul>
+                    <li>HubSpot integration</li>
+                    <li>Chat interface</li>
+                    <li>AI agent capabilities</li>
+                    <li>Email and calendar automation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
