@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { ChatMessage } from '../../models/chat.model';
 import { ChatService } from '../../services/chat.service';
+import { Email, SyncStatus } from '../../models/email.model';
+import { EmailService } from '../../services/email.service';
 
 @Component({
   selector: 'app-chat',
@@ -30,9 +32,17 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   isSending: boolean = false;
   private shouldScrollToBottom: boolean = false;
 
+  // Email properties
+  showEmailPanel: boolean = false;
+  emails: Email[] = [];
+  syncStatus: SyncStatus | null = null;
+  isSyncing: boolean = false;
+  isLoadingEmails: boolean = false;
+
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
+    private emailService: EmailService,
     private router: Router
   ) {}
 
@@ -44,6 +54,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       } else {
         this.currentUser = user;
         this.loadChatHistory();
+        this.loadSyncStatus();
       }
     });
   }
@@ -72,6 +83,68 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  loadSyncStatus() {
+    if (!this.currentUser) return;
+
+    this.emailService.getSyncStatus(this.currentUser.id).subscribe({
+      next: (status) => {
+        this.syncStatus = status;
+        if (status.hasSynced) {
+          this.loadEmails();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading sync status:', error);
+      },
+    });
+  }
+
+  syncEmails() {
+    if (!this.currentUser || this.isSyncing) return;
+
+    this.isSyncing = true;
+    this.emailService.syncEmails(this.currentUser.id, 50).subscribe({
+      next: (response) => {
+        console.log('Sync response:', response);
+        this.isSyncing = false;
+        this.loadSyncStatus();
+        this.loadEmails();
+      },
+      error: (error) => {
+        console.error('Error syncing emails:', error);
+        this.isSyncing = false;
+        alert('Failed to sync emails. Please try again.');
+      },
+    });
+  }
+
+  loadEmails() {
+    if (!this.currentUser) return;
+
+    this.isLoadingEmails = true;
+    this.emailService.getEmails(this.currentUser.id, 20).subscribe({
+      next: (response) => {
+        this.emails = response.emails;
+        this.isLoadingEmails = false;
+      },
+      error: (error) => {
+        console.error('Error loading emails:', error);
+        this.isLoadingEmails = false;
+      },
+    });
+  }
+
+  toggleEmailPanel() {
+    this.showEmailPanel = !this.showEmailPanel;
+    if (
+      this.showEmailPanel &&
+      this.emails.length === 0 &&
+      this.syncStatus?.hasSynced
+    ) {
+      this.loadEmails();
+    }
+  }
+
   sendMessage() {
     if (!this.newMessage.trim() || !this.currentUser || this.isSending) return;
 
@@ -91,7 +164,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       error: (error) => {
         console.error('Error sending message:', error);
         this.isSending = false;
-        // Re-add the message to input so user can retry
         this.newMessage = messageText;
       },
     });
