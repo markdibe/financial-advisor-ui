@@ -1,0 +1,10 @@
+<div class="callback-container">
+    <div class="loading-spinner" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Connecting to HubSpot...</p>
+    </div>
+    <div class="error-message" *ngIf="error">
+        <p>{{ error }}</p>
+        <button (click)="goHome()">Go to Home</button>
+    </div>
+</div>
