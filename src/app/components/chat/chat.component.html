@@ -77,6 +77,138 @@
         </small>
             </div>
 
+            <!-- NEW: HubSpot Section in Sidebar -->
+            <div class="sidebar-section hubspot-section">
+                <div class="section-header">
+                    <h3>🔶 HubSpot CRM</h3>
+                    <span class="connection-badge" [class.connected]="hubspotConnected">
+            {{ hubspotConnected ? "✓ Connected" : "✗ Not Connected" }}
+          </span>
+                </div>
+
+                <!-- Connect Button (when not connected) -->
+                <button *ngIf="!hubspotConnected" class="btn-connect-hubspot" (click)="connectHubSpot()">
+          Connect HubSpot
+        </button>
+
+                <!-- HubSpot Controls (when connected) -->
+                <div *ngIf="hubspotConnected" class="hubspot-controls">
+                    <button class="btn-sync" (click)="syncHubSpot()" [disabled]="isSyncingHubSpot">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              [class.spinning]="isSyncingHubSpot"
+            >
+              <path
+                d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"
+                stroke-width="2"
+              />
+            </svg>
+            {{ isSyncingHubSpot ? "Syncing..." : "Sync HubSpot" }}
+          </button>
+
+                    <!-- Stats Summary -->
+                    <div class="hubspot-stats">
+                        <div class="stat-item">
+                            <span class="stat-icon">👥</span>
+                            <span class="stat-value">{{ contactCount }}</span>
+                            <span class="stat-label">Contacts</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">🏢</span>
+                            <span class="stat-value">{{ companyCount }}</span>
+                            <span class="stat-label">Companies</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">💼</span>
+                            <span class="stat-value">{{ dealCount }}</span>
+                            <span class="stat-label">Deals</span>
+                        </div>
+                    </div>
+
+                    <!-- Toggle Details -->
+                    <button class="btn-toggle-details" (click)="toggleHubSpotDetails()">
+            <span>{{
+              showHubSpotDetails ? "▼ Hide Details" : "▶ Show Details"
+            }}</span>
+          </button>
+                </div>
+
+                <!-- HubSpot Details Panel -->
+                <div *ngIf="hubspotConnected && showHubSpotDetails" class="hubspot-details">
+                    <!-- Recent Contacts -->
+                    <div class="detail-section" *ngIf="contacts.length > 0">
+                        <h4>Recent Contacts</h4>
+                        <div class="contact-list">
+                            <div class="contact-item" *ngFor="let contact of contacts.slice(0, 5)">
+                                <div class="contact-name">
+                                    {{ contact.firstName }} {{ contact.lastName }}
+                                </div>
+                                <div class="contact-details">
+                                    <div *ngIf="contact.email" class="detail-row">
+                                        <span class="icon">✉️</span>
+                                        <span class="text">{{ contact.email }}</span>
+                                    </div>
+                                    <div *ngIf="contact.company" class="detail-row">
+                                        <span class="icon">🏢</span>
+                                        <span class="text">{{ contact.company }}</span>
+                                    </div>
+                                    <div *ngIf="contact.jobTitle" class="detail-row">
+                                        <span class="icon">💼</span>
+                                        <span class="text">{{ contact.jobTitle }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Deals -->
+                    <div class="detail-section" *ngIf="deals.length > 0">
+                        <h4>Recent Deals</h4>
+                        <div class="deal-list">
+                            <div class="deal-item" *ngFor="let deal of deals.slice(0, 5)">
+                                <div class="deal-name">{{ deal.dealName }}</div>
+                                <div class="deal-details">
+                                    <div *ngIf="deal.amount" class="detail-row">
+                                        <span class="icon">💰</span>
+                                        <span class="text">${{ deal.amount | number : "1.0-0" }}</span
+                    >
+                  </div>
+                  <div class="detail-row">
+                    <span class="icon">📊</span>
+                                        <span class="text">{{ deal.dealStage }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Companies -->
+                    <div class="detail-section" *ngIf="companies.length > 0">
+                        <h4>Recent Companies</h4>
+                        <div class="company-list">
+                            <div class="company-item" *ngFor="let company of companies.slice(0, 5)">
+                                <div class="company-name">{{ company.name }}</div>
+                                <div class="company-details">
+                                    <div *ngIf="company.industry" class="detail-row">
+                                        <span class="text">{{ company.industry }}</span>
+                                    </div>
+                                    <div *ngIf="company.city" class="detail-row">
+                                        <span class="icon">📍</span>
+                                        <span class="text">{{ company.city }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: HubSpot Section -->
+
+            <!-- Original Email List -->
             <div class="email-list" *ngIf="!isLoadingEmails && emails.length > 0">
                 <div class="email-item" *ngFor="let email of emails" [class.unread]="!email.isRead">
                     <div class="email-item-header">
@@ -177,9 +309,8 @@
             <!-- Input Area -->
             <div class="input-container">
                 <div class="input-wrapper">
-                    <textarea [(ngModel)]="newMessage" (keypress)="onKeyPress($event)" placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)" rows="1" [disabled]="isSending" class="message-input">
-          </textarea>
-                    <button class="send-button" (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending" [class.sending]="isSending">
+                    <textarea [(ngModel)]="newMessage" (keypress)="onKeyPress($event)" placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)" rows="1" [disabled]="isSending" class="message-input"></textarea>
+                    <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending" [class.sending]="isSending">
             <svg
               *ngIf="!isSending"
               width="20"

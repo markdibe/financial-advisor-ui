@@ -671,3 +671,244 @@
 .email-sidebar.open~.messages-wrapper .messages-container {
     padding: 24px;
 }
+
+.sidebar-section.hubspot-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.connection-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: #fee;
+    color: #c33;
+    font-weight: 500;
+}
+
+.connection-badge.connected {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-connect-hubspot {
+    width: 100%;
+    padding: 10px 16px;
+    background: #ff7a59;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+}
+
+.btn-connect-hubspot:hover {
+    background: #ff6243;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 122, 89, 0.3);
+}
+
+.hubspot-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hubspot-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff7a59;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.btn-toggle-details {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-toggle-details:hover {
+    background: #f8f9fa;
+    border-color: #ff7a59;
+    color: #ff7a59;
+}
+
+
+/* HubSpot Details Panel */
+
+.hubspot-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e1e8ed;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.detail-section {
+    margin-bottom: 16px;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contact-list,
+.deal-list,
+.company-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-item,
+.deal-item,
+.company-item {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.contact-item:hover,
+.deal-item:hover,
+.company-item:hover {
+    border-color: #ff7a59;
+    box-shadow: 0 2px 4px rgba(255, 122, 89, 0.1);
+}
+
+.contact-name,
+.deal-name,
+.company-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.contact-details,
+.deal-details,
+.company-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.detail-row .icon {
+    font-size: 11px;
+    opacity: 0.7;
+    min-width: 16px;
+}
+
+.detail-row .text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* Scrollbar for HubSpot Details */
+
+.hubspot-details::-webkit-scrollbar {
+    width: 4px;
+}
+
+.hubspot-details::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.hubspot-details::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 2px;
+}
+
+.hubspot-details::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+}
+
+
+/* Loading spinner for HubSpot sync */
+
+.btn-sync svg.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

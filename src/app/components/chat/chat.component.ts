@@ -14,6 +14,12 @@ import { ChatMessage } from '../../models/chat.model';
 import { ChatService } from '../../services/chat.service';
 import { Email, SyncStatus } from '../../models/email.model';
 import { EmailService } from '../../services/email.service';
+import {
+  HubSpotCompany,
+  HubSpotContact,
+  HubSpotDeal,
+} from '../../models/hubspot.model';
+import { HubspotService } from '../../services/hubspot.service';
 
 @Component({
   selector: 'app-chat',
@@ -31,6 +37,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   isLoading: boolean = false;
   isSending: boolean = false;
   private shouldScrollToBottom: boolean = false;
+  userId: number = 0;
 
   // Email properties
   showEmailPanel: boolean = false;
@@ -39,22 +46,47 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   isSyncing: boolean = false;
   isLoadingEmails: boolean = false;
 
+  // HubSpot
+  hubspotConnected = false;
+  contacts: HubSpotContact[] = [];
+  companies: HubSpotCompany[] = [];
+  deals: HubSpotDeal[] = [];
+  contactCount = 0;
+  companyCount = 0;
+  dealCount = 0;
+  showHubSpotDetails = false;
+  isSyncingHubSpot: boolean = false;
+
+  // Calendar
+  calendarConnected = false;
+  eventCount = 0;
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
     private emailService: EmailService,
-    private router: Router
+    private router: Router,
+    private hubspotService: HubspotService
   ) {}
 
   ngOnInit() {
     // Check if user is authenticated
+
     this.authService.currentUser$.subscribe((user) => {
       if (!user) {
         this.router.navigate(['/login']);
       } else {
         this.currentUser = user;
+        this.userId = user.id;
         this.loadChatHistory();
         this.loadSyncStatus();
+        this.checkHubSpotStatus();
+      }
+    });
+
+    this.hubspotService.connected$.subscribe((connected) => {
+      this.hubspotConnected = connected;
+      if (connected) {
+        this.loadHubSpotData();
       }
     });
   }
@@ -203,6 +235,93 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         },
       });
     }
+  }
+
+  checkHubSpotStatus() {
+    this.hubspotService.checkConnectionStatus(this.userId).subscribe({
+      next: (response) => {
+        this.hubspotConnected = response.connected;
+        if (response.connected) {
+          this.loadHubSpotData();
+        }
+      },
+      error: (error) => console.error('Error checking HubSpot status:', error),
+    });
+  }
+
+  connectHubSpot() {
+    this.hubspotService.initiateConnection(this.userId).subscribe({
+      next: (response) => {
+        // Redirect to HubSpot OAuth
+        window.location.href = response.authUrl;
+      },
+      error: (error) => {
+        console.error('Error initiating HubSpot connection:', error);
+        alert('Failed to connect to HubSpot. Please try again.');
+      },
+    });
+  }
+
+  syncHubSpot() {
+    if (this.isSyncingHubSpot) return;
+    this.isSyncingHubSpot = true;
+
+    this.hubspotService.syncHubSpot(this.userId).subscribe({
+      next: () => {
+        console.log('HubSpot sync started');
+        // Wait a bit then reload data
+        setTimeout(() => {
+          this.loadHubSpotData();
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('Error syncing HubSpot:', error);
+        this.isSyncingHubSpot = false;
+      },
+      complete: () => {
+        this.isSyncingHubSpot = false;
+      },
+    });
+  }
+
+  loadHubSpotData() {
+    // Get sync status
+    this.hubspotService.getSyncStatus(this.userId).subscribe({
+      next: (status) => {
+        this.contactCount = status.contactCount;
+        this.companyCount = status.companyCount;
+        this.dealCount = status.dealCount;
+      },
+      error: (error) => console.error('Error getting sync status:', error),
+    });
+
+    // Load contacts
+    this.hubspotService.getContacts(this.userId, 10).subscribe({
+      next: (response) => {
+        this.contacts = response.contacts;
+      },
+      error: (error) => console.error('Error loading contacts:', error),
+    });
+
+    // Load companies
+    this.hubspotService.getCompanies(this.userId, 10).subscribe({
+      next: (response) => {
+        this.companies = response.companies;
+      },
+      error: (error) => console.error('Error loading companies:', error),
+    });
+
+    // Load deals
+    this.hubspotService.getDeals(this.userId, 10).subscribe({
+      next: (response) => {
+        this.deals = response.deals;
+      },
+      error: (error) => console.error('Error loading deals:', error),
+    });
+  }
+
+  toggleHubSpotDetails() {
+    this.showHubSpotDetails = !this.showHubSpotDetails;
   }
 
   private scrollToBottom(): void {
