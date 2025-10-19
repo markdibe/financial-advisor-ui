@@ -6,7 +6,7 @@
 }
 
 
-/* Header */
+/* ==================== HEADER ==================== */
 
 .chat-header {
     background: white;
@@ -41,6 +41,35 @@
     color: #4a5568;
     font-size: 14px;
     font-weight: 500;
+}
+
+
+/* Updated Data Panel Button */
+
+.btn-data-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #4a5568;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-data-panel:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.btn-data-panel.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
 }
 
 .btn-clear {
@@ -78,7 +107,435 @@
 }
 
 
-/* Messages Container */
+/* ==================== MAIN CONTENT ==================== */
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+
+/* ==================== UNIFIED DATA SIDEBAR ==================== */
+
+.data-sidebar {
+    width: 0;
+    overflow: hidden;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.data-sidebar.open {
+    width: 380px;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+}
+
+.btn-close:hover {
+    opacity: 0.8;
+}
+
+
+/* ==================== DATA SECTIONS (Unified Style) ==================== */
+
+.data-section {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-icon {
+    font-size: 20px;
+}
+
+.section-title h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.data-count {
+    background: #667eea;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.connection-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #fee;
+    color: #c33;
+    font-weight: 600;
+}
+
+.connection-badge.connected {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+
+/* Section Info */
+
+.section-info {
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.last-sync {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #718096;
+}
+
+.sync-prompt {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 500;
+}
+
+
+/* ==================== BUTTONS ==================== */
+
+.btn-sync-section {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+}
+
+.btn-sync-section:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-sync-section:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-sync-section svg.spinning {
+    animation: spin 1s linear infinite;
+}
+
+.btn-connect {
+    width: 100%;
+    padding: 10px 16px;
+    background: #ff7a59;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+}
+
+.btn-connect:hover {
+    background: #ff6243;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 122, 89, 0.3);
+}
+
+
+/* ==================== DATA LISTS (Unified) ==================== */
+
+.data-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 12px;
+}
+
+.data-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.data-item:hover {
+    background: #edf2f7;
+    transform: translateX(2px);
+}
+
+.data-item.unread {
+    background: #eef2ff;
+    border-left: 3px solid #667eea;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+
+.item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-date {
+    font-size: 11px;
+    color: #a0aec0;
+    white-space: nowrap;
+}
+
+.item-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-time {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.item-snippet {
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.detail-row .icon {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.detail-row .text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==================== LOADING & EMPTY STATES ==================== */
+
+.data-loading,
+.data-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    color: #a0aec0;
+    text-align: center;
+}
+
+.spinner-small {
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ==================== HUBSPOT SPECIFIC ==================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    background: #edf2f7;
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #667eea;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.btn-toggle-details {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.btn-toggle-details:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.hubspot-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.detail-section {
+    margin-bottom: 20px;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-section h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* ==================== MESSAGES WRAPPER ==================== */
+
+.messages-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
 
 .messages-container {
     flex: 1;
@@ -90,7 +547,7 @@
 }
 
 
-/* Loading State */
+/* ==================== LOADING STATE ==================== */
 
 .loading-state {
     display: flex;
@@ -111,17 +568,8 @@
     margin-bottom: 16px;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
 
-
-/* Empty State */
+/* ==================== EMPTY STATE ==================== */
 
 .empty-state {
     display: flex;
@@ -178,7 +626,7 @@
 }
 
 
-/* Message */
+/* ==================== MESSAGE ==================== */
 
 .message {
     display: flex;
@@ -286,7 +734,7 @@
 }
 
 
-/* Typing Indicator */
+/* ==================== TYPING INDICATOR ==================== */
 
 .typing-indicator .message-content {
     padding: 16px;
@@ -328,7 +776,7 @@
 }
 
 
-/* Input Area */
+/* ==================== INPUT AREA ==================== */
 
 .input-container {
     background: white;
@@ -410,27 +858,35 @@
 }
 
 
-/* Scrollbar Styling */
+/* ==================== SCROLLBAR ==================== */
 
-.messages-container::-webkit-scrollbar {
-    width: 8px;
+.data-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar,
+.hubspot-details::-webkit-scrollbar {
+    width: 6px;
 }
 
-.messages-container::-webkit-scrollbar-track {
+.data-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track,
+.hubspot-details::-webkit-scrollbar-track {
     background: #f7fafc;
 }
 
-.messages-container::-webkit-scrollbar-thumb {
+.data-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb,
+.hubspot-details::-webkit-scrollbar-thumb {
     background: #cbd5e0;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
-.messages-container::-webkit-scrollbar-thumb:hover {
+.data-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover,
+.hubspot-details::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;
 }
 
 
-/* Responsive */
+/* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 768px) {
     .chat-header {
@@ -451,464 +907,35 @@
     .user-email {
         display: none;
     }
+    .data-sidebar.open {
+        width: 320px;
+    }
 }
 
-
-/* Email Sidebar Styles - ADD THESE TO THE END OF chat.component.css */
-
-.btn-emails {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #4a5568;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-    position: relative;
-}
-
-.btn-emails:hover {
-    border-color: #667eea;
-    color: #667eea;
-}
-
-.btn-emails.active {
-    background: #667eea;
-    border-color: #667eea;
-    color: white;
-}
-
-.email-badge {
-    background: #e53e3e;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.btn-emails.active .email-badge {
-    background: white;
-    color: #667eea;
-}
-
-.main-content {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.email-sidebar {
-    width: 0;
-    overflow: hidden;
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    transition: width 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.email-sidebar.open {
-    width: 350px;
-}
-
-.email-sidebar-header {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.email-sidebar-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #2d3748;
-}
-
-.btn-sync {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: #667eea;
-    color: white;
-    border: none;
+.btn-toggle-list {
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid #e2e8f0;
     border-radius: 6px;
-    cursor: pointer;
     font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.btn-sync:hover:not(:disabled) {
-    background: #5568d3;
-}
-
-.btn-sync:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn-sync svg.spinning {
-    animation: spin 1s linear infinite;
-}
-
-.email-sync-info {
-    padding: 12px 16px;
-    background: #f7fafc;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 12px;
-    color: #718096;
-}
-
-.sync-prompt {
-    color: #667eea;
-    font-weight: 500;
-}
-
-.email-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.email-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f7fafc;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.email-item:hover {
-    background: #f7fafc;
-}
-
-.email-item.unread {
-    background: #edf2f7;
-}
-
-.email-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.email-from {
-    font-size: 13px;
-    font-weight: 600;
-    color: #2d3748;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-}
-
-.email-date {
-    font-size: 11px;
-    color: #a0aec0;
-}
-
-.email-subject {
-    font-size: 13px;
-    font-weight: 500;
     color: #4a5568;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.email-snippet {
-    font-size: 12px;
-    color: #718096;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.email-loading,
-.email-empty {
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    margin-bottom: 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 16px;
-    color: #a0aec0;
-}
-
-.spinner-small {
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    border-top: 2px solid #667eea;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 12px;
-}
-
-.messages-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    transition: margin-left 0.3s ease;
-}
-
-.messages-wrapper.sidebar-open {
-    margin-left: 0;
-}
-
-
-/* Adjust messages container for sidebar */
-
-.email-sidebar.open~.messages-wrapper .messages-container {
-    padding: 24px;
-}
-
-.sidebar-section.hubspot-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e1e8ed;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.section-header h3 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-}
-
-.connection-badge {
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: #fee;
-    color: #c33;
-    font-weight: 500;
-}
-
-.connection-badge.connected {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.btn-connect-hubspot {
-    width: 100%;
-    padding: 10px 16px;
-    background: #ff7a59;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 12px;
-}
-
-.btn-connect-hubspot:hover {
-    background: #ff6243;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(255, 122, 89, 0.3);
-}
-
-.hubspot-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.hubspot-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 12px 0;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.stat-icon {
-    font-size: 18px;
-    margin-bottom: 4px;
-}
-
-.stat-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: #ff7a59;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 11px;
-    color: #666;
-    margin-top: 2px;
-}
-
-.btn-toggle-details {
-    width: 100%;
-    padding: 8px;
-    background: transparent;
-    border: 1px solid #e1e8ed;
-    border-radius: 6px;
-    font-size: 12px;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-toggle-details:hover {
-    background: #f8f9fa;
-    border-color: #ff7a59;
-    color: #ff7a59;
-}
-
-
-/* HubSpot Details Panel */
-
-.hubspot-details {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e1e8ed;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.detail-section {
-    margin-bottom: 16px;
-}
-
-.detail-section:last-child {
-    margin-bottom: 0;
-}
-
-.detail-section h4 {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0 0 8px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.contact-list,
-.deal-list,
-.company-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.contact-item,
-.deal-item,
-.company-item {
-    background: white;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #e1e8ed;
-    font-size: 13px;
-    transition: all 0.2s;
-}
-
-.contact-item:hover,
-.deal-item:hover,
-.company-item:hover {
-    border-color: #ff7a59;
-    box-shadow: 0 2px 4px rgba(255, 122, 89, 0.1);
-}
-
-.contact-name,
-.deal-name,
-.company-name {
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 6px;
-    font-size: 13px;
-}
-
-.contact-details,
-.deal-details,
-.company-details {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.detail-row {
-    display: flex;
-    align-items: center;
     gap: 6px;
-    font-size: 12px;
-    color: #666;
 }
 
-.detail-row .icon {
-    font-size: 11px;
-    opacity: 0.7;
-    min-width: 16px;
-}
-
-.detail-row .text {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
-/* Scrollbar for HubSpot Details */
-
-.hubspot-details::-webkit-scrollbar {
-    width: 4px;
-}
-
-.hubspot-details::-webkit-scrollbar-track {
+.btn-toggle-list:hover {
     background: #f8f9fa;
+    border-color: #667eea;
+    color: #667eea;
 }
 
-.hubspot-details::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 2px;
-}
-
-.hubspot-details::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
-}
-
-
-/* Loading spinner for HubSpot sync */
-
-.btn-sync svg.spinning {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.btn-toggle-list:active {
+    transform: scale(0.98);
 }

@@ -20,6 +20,9 @@ import {
   HubSpotDeal,
 } from '../../models/hubspot.model';
 import { HubspotService } from '../../services/hubspot.service';
+import { CalendarService } from '../../services/calendar.service';
+import { CalendarEvent, CalendarSyncStatus } from '../../models/calendar.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -30,7 +33,8 @@ import { HubspotService } from '../../services/hubspot.service';
 })
 export class ChatComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
-
+  showEmailList: boolean = false;
+  showCalendarList: boolean = false;
   currentUser: User | null = null;
   messages: ChatMessage[] = [];
   newMessage: string = '';
@@ -40,11 +44,17 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   userId: number = 0;
 
   // Email properties
-  showEmailPanel: boolean = false;
+  showDataPanel: boolean = false;
   emails: Email[] = [];
   syncStatus: SyncStatus | null = null;
   isSyncing: boolean = false;
   isLoadingEmails: boolean = false;
+
+  // Calendar properties
+  calendarEvents: CalendarEvent[] = [];
+  calendarSyncStatus: CalendarSyncStatus | null = null;
+  isSyncingCalendar: boolean = false;
+  isLoadingCalendar: boolean = false;
 
   // HubSpot
   hubspotConnected = false;
@@ -57,20 +67,21 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   showHubSpotDetails = false;
   isSyncingHubSpot: boolean = false;
 
-  // Calendar
-  calendarConnected = false;
-  eventCount = 0;
+  // Auto-sync settings
+  private readonly STALE_THRESHOLD_MINUTES = 10; // Email & Calendar
+  private readonly HUBSPOT_STALE_THRESHOLD_MINUTES = 15; // HubSpot (slower)
+
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
     private emailService: EmailService,
-    private router: Router,
-    private hubspotService: HubspotService
+    private calendarService: CalendarService,
+    private hubspotService: HubspotService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     // Check if user is authenticated
-
     this.authService.currentUser$.subscribe((user) => {
       if (!user) {
         this.router.navigate(['/login']);
@@ -78,8 +89,12 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         this.currentUser = user;
         this.userId = user.id;
         this.loadChatHistory();
-        this.loadSyncStatus();
-        this.checkHubSpotStatus();
+
+        // Load all cached data immediately (fast)
+        this.loadAllCachedData();
+
+        // Then check and auto-sync stale data in background
+        this.checkAndAutoSyncAll();
       }
     });
 
@@ -97,6 +112,112 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       this.shouldScrollToBottom = false;
     }
   }
+  toggleEmailList() {
+    this.showEmailList = !this.showEmailList;
+  }
+  toggleCalendarList() {
+    this.showCalendarList = !this.showCalendarList;
+  }
+  /**
+   * Load all cached data immediately for instant UI
+   */
+  private loadAllCachedData() {
+    this.loadSyncStatus();
+    this.loadCalendarSyncStatus();
+    this.checkHubSpotStatus();
+  }
+
+  /**
+   * Check sync status and auto-sync stale data in background
+   */
+  private checkAndAutoSyncAll() {
+    // Check all sync statuses in parallel
+    forkJoin({
+      email: this.emailService.getSyncStatus(this.userId),
+      calendar: this.calendarService.getSyncStatus(this.userId),
+    }).subscribe({
+      next: (statuses) => {
+        // Auto-sync emails if stale
+        if (
+          !statuses.email.hasSynced ||
+          this.isStale(statuses.email.lastSync, this.STALE_THRESHOLD_MINUTES)
+        ) {
+          this.silentSyncEmails();
+        } else if (statuses.email.hasSynced) {
+          this.loadEmails();
+        }
+
+        // Auto-sync calendar if stale
+        if (
+          !statuses.calendar.hasSynced ||
+          this.isStale(statuses.calendar.lastSync, this.STALE_THRESHOLD_MINUTES)
+        ) {
+          this.silentSyncCalendar();
+        } else if (statuses.calendar.hasSynced) {
+          this.loadCalendarEvents();
+        }
+      },
+      error: (error) => {
+        console.error('Error checking sync status:', error);
+      },
+    });
+
+    // Check HubSpot separately (if connected)
+    if (this.hubspotConnected) {
+      // HubSpot doesn't have lastSync in status, so we sync less frequently
+      // We'll just load the data for now
+      this.loadHubSpotData();
+    }
+  }
+
+  /**
+   * Check if data is stale based on last sync time
+   */
+  private isStale(
+    lastSync: string | undefined,
+    thresholdMinutes: number
+  ): boolean {
+    if (!lastSync) return true;
+
+    const syncTime = new Date(lastSync).getTime();
+    const now = new Date().getTime();
+    const diffMinutes = (now - syncTime) / (1000 * 60);
+
+    return diffMinutes > thresholdMinutes;
+  }
+
+  /**
+   * Silent sync emails in background (no full loading state)
+   */
+  private silentSyncEmails() {
+    // Use a smaller batch for background sync
+    this.emailService.syncEmails(this.userId, 50).subscribe({
+      next: () => {
+        this.loadSyncStatus();
+        this.loadEmails();
+      },
+      error: (error) => {
+        console.error('Background email sync failed:', error);
+      },
+    });
+  }
+
+  /**
+   * Silent sync calendar in background
+   */
+  private silentSyncCalendar() {
+    this.calendarService.syncCalendar(this.userId, false).subscribe({
+      next: () => {
+        this.loadCalendarSyncStatus();
+        this.loadCalendarEvents();
+      },
+      error: (error) => {
+        console.error('Background calendar sync failed:', error);
+      },
+    });
+  }
+
+  // ==================== EXISTING METHODS (Keep as is) ====================
 
   loadChatHistory() {
     if (!this.currentUser) return;
@@ -121,9 +242,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     this.emailService.getSyncStatus(this.currentUser.id).subscribe({
       next: (status) => {
         this.syncStatus = status;
-        if (status.hasSynced) {
-          this.loadEmails();
-        }
       },
       error: (error) => {
         console.error('Error loading sync status:', error);
@@ -131,6 +249,9 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  /**
+   * Manual sync emails (user clicks button)
+   */
   syncEmails() {
     if (!this.currentUser || this.isSyncing) return;
 
@@ -166,14 +287,82 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  toggleEmailPanel() {
-    this.showEmailPanel = !this.showEmailPanel;
+  // ==================== NEW CALENDAR METHODS ====================
+
+  /**
+   * Load calendar sync status
+   */
+  loadCalendarSyncStatus() {
+    if (!this.currentUser) return;
+
+    this.calendarService.getSyncStatus(this.currentUser.id).subscribe({
+      next: (status) => {
+        this.calendarSyncStatus = status;
+      },
+      error: (error) => {
+        console.error('Error loading calendar sync status:', error);
+      },
+    });
+  }
+
+  /**
+   * Manual sync calendar (user clicks button)
+   */
+  syncCalendar() {
+    if (!this.currentUser || this.isSyncingCalendar) return;
+
+    this.isSyncingCalendar = true;
+    this.calendarService.syncCalendar(this.currentUser.id, false).subscribe({
+      next: (response) => {
+        console.log('Calendar sync response:', response);
+        this.isSyncingCalendar = false;
+        this.loadCalendarSyncStatus();
+        this.loadCalendarEvents();
+      },
+      error: (error) => {
+        console.error('Error syncing calendar:', error);
+        this.isSyncingCalendar = false;
+        alert('Failed to sync calendar. Please try again.');
+      },
+    });
+  }
+
+  /**
+   * Load calendar events
+   */
+  loadCalendarEvents() {
+    if (!this.currentUser) return;
+
+    this.isLoadingCalendar = true;
+    this.calendarService.getEvents(this.currentUser.id, 10).subscribe({
+      next: (response) => {
+        this.calendarEvents = response.events;
+        this.isLoadingCalendar = false;
+      },
+      error: (error) => {
+        console.error('Error loading calendar events:', error);
+        this.isLoadingCalendar = false;
+      },
+    });
+  }
+
+  // ==================== EXISTING METHODS (Keep as is) ====================
+
+  toggleDataPanel() {
+    this.showDataPanel = !this.showDataPanel;
     if (
-      this.showEmailPanel &&
+      this.showDataPanel &&
       this.emails.length === 0 &&
       this.syncStatus?.hasSynced
     ) {
       this.loadEmails();
+    }
+    if (
+      this.showDataPanel &&
+      this.calendarEvents.length === 0 &&
+      this.calendarSyncStatus?.hasSynced
+    ) {
+      this.loadCalendarEvents();
     }
   }
 
@@ -252,7 +441,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   connectHubSpot() {
     this.hubspotService.initiateConnection(this.userId).subscribe({
       next: (response) => {
-        // Redirect to HubSpot OAuth
         window.location.href = response.authUrl;
       },
       error: (error) => {
@@ -269,7 +457,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     this.hubspotService.syncHubSpot(this.userId).subscribe({
       next: () => {
         console.log('HubSpot sync started');
-        // Wait a bit then reload data
         setTimeout(() => {
           this.loadHubSpotData();
         }, 3000);
@@ -285,7 +472,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   loadHubSpotData() {
-    // Get sync status
     this.hubspotService.getSyncStatus(this.userId).subscribe({
       next: (status) => {
         this.contactCount = status.contactCount;
@@ -295,7 +481,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       error: (error) => console.error('Error getting sync status:', error),
     });
 
-    // Load contacts
     this.hubspotService.getContacts(this.userId, 10).subscribe({
       next: (response) => {
         this.contacts = response.contacts;
@@ -303,7 +488,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       error: (error) => console.error('Error loading contacts:', error),
     });
 
-    // Load companies
     this.hubspotService.getCompanies(this.userId, 10).subscribe({
       next: (response) => {
         this.companies = response.companies;
@@ -311,7 +495,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       error: (error) => console.error('Error loading companies:', error),
     });
 
-    // Load deals
     this.hubspotService.getDeals(this.userId, 10).subscribe({
       next: (response) => {
         this.deals = response.deals;

@@ -6,7 +6,8 @@
             <span class="subtitle">Ask me anything about your clients</span>
         </div>
         <div class="header-right">
-            <button class="btn-emails" (click)="toggleEmailPanel()" [class.active]="showEmailPanel">
+            <!-- Updated button text and icon -->
+            <button class="btn-data-panel" (click)="toggleDataPanel()" [class.active]="showDataPanel">
         <svg
           width="20"
           height="20"
@@ -14,16 +15,12 @@
           fill="none"
           stroke="currentColor"
         >
-          <path
-            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-            stroke-width="2"
-          />
-          <path d="M22 6l-10 7L2 6" stroke-width="2" />
+          <rect x="3" y="3" width="7" height="7" stroke-width="2" />
+          <rect x="14" y="3" width="7" height="7" stroke-width="2" />
+          <rect x="14" y="14" width="7" height="7" stroke-width="2" />
+          <rect x="3" y="14" width="7" height="7" stroke-width="2" />
         </svg>
-        <span>Emails</span>
-        <span *ngIf="syncStatus?.emailCount" class="email-badge">{{
-          syncStatus?.emailCount
-        }}</span>
+        <span>My Data</span>
       </button>
             <span class="user-email">{{ currentUser?.email }}</span>
             <button class="btn-clear" (click)="clearChat()" title="Clear chat">
@@ -46,11 +43,59 @@
     </div>
 
     <div class="main-content">
-        <!-- Email Sidebar -->
-        <div class="email-sidebar" [class.open]="showEmailPanel">
-            <div class="email-sidebar-header">
-                <h3>📧 Gmail</h3>
-                <button class="btn-sync" (click)="syncEmails()" [disabled]="isSyncing">
+        <!-- Unified Data Sidebar -->
+        <div class="data-sidebar" [class.open]="showDataPanel">
+            <div class="sidebar-header">
+                <h2>📊 My Data</h2>
+                <button class="btn-close" (click)="toggleDataPanel()">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+            </div>
+
+            <!-- Gmail Section -->
+            <div class="data-section gmail-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="section-icon">📧</span>
+                        <h3>Gmail</h3>
+                    </div>
+                    <span class="data-count" *ngIf="syncStatus?.emailCount">
+            {{ syncStatus?.emailCount }}
+          </span>
+                </div>
+
+                <div class="section-info" *ngIf="syncStatus">
+                    <small *ngIf="syncStatus.lastSync" class="last-sync">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="12" cy="12" r="10" stroke-width="2" />
+              <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            {{ syncStatus.lastSync | date : "MMM d, h:mm a" }}
+          </small>
+                    <small *ngIf="!syncStatus.hasSynced" class="sync-prompt">
+            Click sync to import emails
+          </small>
+                </div>
+
+                <button class="btn-sync-section" (click)="syncEmails()" [disabled]="isSyncing">
           <svg
             width="16"
             height="16"
@@ -64,36 +109,152 @@
               stroke-width="2"
             />
           </svg>
-          {{ isSyncing ? "Syncing..." : "Sync" }}
+          <span>{{ isSyncing ? "Syncing..." : "Sync Emails" }}</span>
         </button>
+
+                <!-- Toggle Email List Button -->
+                <button class="btn-toggle-list" (click)="toggleEmailList()" *ngIf="syncStatus?.hasSynced && emails.length > 0">
+          {{ showEmailList ? "▼ Hide Emails" : "▶ Show Emails" }} ({{
+            emails.length
+          }})
+        </button>
+
+                <!-- Email List (Toggleable) -->
+                <div class="data-list" *ngIf="showEmailList && !isLoadingEmails && emails.length > 0">
+                    <div class="data-item email-item" *ngFor="let email of emails" [class.unread]="!email.isRead">
+                        <div class="item-header">
+                            <span class="item-title">{{ email.fromEmail }}</span>
+                            <span class="item-date">{{
+                email.emailDate | date : "MMM d"
+              }}</span>
+                        </div>
+                        <div class="item-subtitle">{{ email.subject }}</div>
+                        <div class="item-snippet">{{ email.snippet }}</div>
+                    </div>
+                </div>
+
+                <div class="data-loading" *ngIf="isLoadingEmails">
+                    <div class="spinner-small"></div>
+                    <p>Loading emails...</p>
+                </div>
+
+                <div class="data-empty" *ngIf="
+            !isLoadingEmails && emails.length === 0 && syncStatus?.hasSynced
+          ">
+                    <p>No emails found</p>
+                </div>
             </div>
 
-            <div class="email-sync-info" *ngIf="syncStatus">
-                <small *ngIf="syncStatus.lastSync">
-          Last sync: {{ syncStatus.lastSync | date : "short" }}
-        </small>
-                <small *ngIf="!syncStatus.hasSynced" class="sync-prompt">
-          Click Sync to import your emails
-        </small>
-            </div>
-
-            <!-- NEW: HubSpot Section in Sidebar -->
-            <div class="sidebar-section hubspot-section">
+            <!-- Calendar Section -->
+            <div class="data-section calendar-section">
                 <div class="section-header">
-                    <h3>🔶 HubSpot CRM</h3>
-                    <span class="connection-badge" [class.connected]="hubspotConnected">
-            {{ hubspotConnected ? "✓ Connected" : "✗ Not Connected" }}
+                    <div class="section-title">
+                        <span class="section-icon">📅</span>
+                        <h3>Calendar</h3>
+                    </div>
+                    <span class="data-count" *ngIf="calendarSyncStatus?.upcomingCount">
+            {{ calendarSyncStatus?.upcomingCount }}
           </span>
                 </div>
 
-                <!-- Connect Button (when not connected) -->
-                <button *ngIf="!hubspotConnected" class="btn-connect-hubspot" (click)="connectHubSpot()">
+                <div class="section-info" *ngIf="calendarSyncStatus">
+                    <small *ngIf="calendarSyncStatus.lastSync" class="last-sync">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="12" cy="12" r="10" stroke-width="2" />
+              <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            {{ calendarSyncStatus.lastSync | date : "MMM d, h:mm a" }}
+          </small>
+                    <small *ngIf="!calendarSyncStatus.hasSynced" class="sync-prompt">
+            Click sync to import events
+          </small>
+                </div>
+
+                <button class="btn-sync-section" (click)="syncCalendar()" [disabled]="isSyncingCalendar">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            [class.spinning]="isSyncingCalendar"
+          >
+            <path
+              d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"
+              stroke-width="2"
+            />
+          </svg>
+          <span>{{ isSyncingCalendar ? "Syncing..." : "Sync Calendar" }}</span>
+        </button>
+
+                <!-- Toggle Calendar List Button -->
+                <button class="btn-toggle-list" (click)="toggleCalendarList()" *ngIf="calendarSyncStatus?.hasSynced && calendarEvents.length > 0">
+          {{ showCalendarList ? "▼ Hide Events" : "▶ Show Events" }} ({{
+            calendarEvents.length
+          }})
+        </button>
+
+                <!-- Calendar Events List (Toggleable) -->
+                <div class="data-list" *ngIf="
+            showCalendarList && !isLoadingCalendar && calendarEvents.length > 0
+          ">
+                    <div class="data-item calendar-item" *ngFor="let event of calendarEvents">
+                        <div class="item-header">
+                            <span class="item-title">{{ event.summary }}</span>
+                            <span class="item-date">{{
+                event.startTime | date : "MMM d"
+              }}</span>
+                        </div>
+                        <div class="item-time">
+                            {{ event.startTime | date : "h:mm a" }}
+                            <span *ngIf="event.location"> • {{ event.location }}</span>
+                        </div>
+                        <div class="item-snippet" *ngIf="event.description">
+                            {{ event.description }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-loading" *ngIf="isLoadingCalendar">
+                    <div class="spinner-small"></div>
+                    <p>Loading events...</p>
+                </div>
+
+                <div class="data-empty" *ngIf="
+            !isLoadingCalendar &&
+            calendarEvents.length === 0 &&
+            calendarSyncStatus?.hasSynced
+          ">
+                    <p>No upcoming events</p>
+                </div>
+            </div>
+
+            <!-- HubSpot Section -->
+            <div class="data-section hubspot-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="section-icon">🔶</span>
+                        <h3>HubSpot CRM</h3>
+                    </div>
+                    <span class="connection-badge" [class.connected]="hubspotConnected">
+            {{ hubspotConnected ? "✓" : "✗" }}
+          </span>
+                </div>
+
+                <!-- Connect Button -->
+                <button *ngIf="!hubspotConnected" class="btn-connect" (click)="connectHubSpot()">
           Connect HubSpot
         </button>
 
                 <!-- HubSpot Controls (when connected) -->
-                <div *ngIf="hubspotConnected" class="hubspot-controls">
-                    <button class="btn-sync" (click)="syncHubSpot()" [disabled]="isSyncingHubSpot">
+                <div *ngIf="hubspotConnected">
+                    <button class="btn-sync-section" (click)="syncHubSpot()" [disabled]="isSyncingHubSpot">
             <svg
               width="16"
               height="16"
@@ -107,22 +268,22 @@
                 stroke-width="2"
               />
             </svg>
-            {{ isSyncingHubSpot ? "Syncing..." : "Sync HubSpot" }}
+            <span>{{ isSyncingHubSpot ? "Syncing..." : "Sync HubSpot" }}</span>
           </button>
 
-                    <!-- Stats Summary -->
-                    <div class="hubspot-stats">
-                        <div class="stat-item">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
                             <span class="stat-icon">👥</span>
                             <span class="stat-value">{{ contactCount }}</span>
                             <span class="stat-label">Contacts</span>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-card">
                             <span class="stat-icon">🏢</span>
                             <span class="stat-value">{{ companyCount }}</span>
                             <span class="stat-label">Companies</span>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-card">
                             <span class="stat-icon">💼</span>
                             <span class="stat-value">{{ dealCount }}</span>
                             <span class="stat-label">Deals</span>
@@ -130,110 +291,85 @@
                     </div>
 
                     <!-- Toggle Details -->
-                    <button class="btn-toggle-details" (click)="toggleHubSpotDetails()">
-            <span>{{
-              showHubSpotDetails ? "▼ Hide Details" : "▶ Show Details"
-            }}</span>
+                    <button class="btn-toggle-list" (click)="toggleHubSpotDetails()">
+            {{ showHubSpotDetails ? "▼ Hide Details" : "▶ Show Details" }}
           </button>
-                </div>
 
-                <!-- HubSpot Details Panel -->
-                <div *ngIf="hubspotConnected && showHubSpotDetails" class="hubspot-details">
-                    <!-- Recent Contacts -->
-                    <div class="detail-section" *ngIf="contacts.length > 0">
-                        <h4>Recent Contacts</h4>
-                        <div class="contact-list">
-                            <div class="contact-item" *ngFor="let contact of contacts.slice(0, 5)">
-                                <div class="contact-name">
-                                    {{ contact.firstName }} {{ contact.lastName }}
+                    <!-- Details Panel -->
+                    <div class="hubspot-details" *ngIf="showHubSpotDetails">
+                        <!-- Recent Contacts -->
+                        <div class="detail-section" *ngIf="contacts.length > 0">
+                            <h4>Recent Contacts</h4>
+                            <div class="data-list">
+                                <div class="data-item" *ngFor="let contact of contacts.slice(0, 5)">
+                                    <div class="item-title">
+                                        {{ contact.firstName }} {{ contact.lastName }}
+                                    </div>
+                                    <div class="item-details">
+                                        <div *ngIf="contact.email" class="detail-row">
+                                            <span class="icon">✉️</span>
+                                            <span class="text">{{ contact.email }}</span>
+                                        </div>
+                                        <div *ngIf="contact.company" class="detail-row">
+                                            <span class="icon">🏢</span>
+                                            <span class="text">{{ contact.company }}</span>
+                                        </div>
+                                        <div *ngIf="contact.jobTitle" class="detail-row">
+                                            <span class="icon">💼</span>
+                                            <span class="text">{{ contact.jobTitle }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="contact-details">
-                                    <div *ngIf="contact.email" class="detail-row">
-                                        <span class="icon">✉️</span>
-                                        <span class="text">{{ contact.email }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Recent Deals -->
+                        <div class="detail-section" *ngIf="deals.length > 0">
+                            <h4>Recent Deals</h4>
+                            <div class="data-list">
+                                <div class="data-item" *ngFor="let deal of deals.slice(0, 5)">
+                                    <div class="item-title">{{ deal.dealName }}</div>
+                                    <div class="item-details">
+                                        <div *ngIf="deal.amount" class="detail-row">
+                                            <span class="icon">💰</span>
+                                            <span class="text">${{ deal.amount | number : "1.0-0" }}</span
+                      >
+                    </div>
+                    <div class="detail-row">
+                      <span class="icon">📊</span>
+                                            <span class="text">{{ deal.dealStage }}</span>
+                                        </div>
                                     </div>
-                                    <div *ngIf="contact.company" class="detail-row">
-                                        <span class="icon">🏢</span>
-                                        <span class="text">{{ contact.company }}</span>
-                                    </div>
-                                    <div *ngIf="contact.jobTitle" class="detail-row">
-                                        <span class="icon">💼</span>
-                                        <span class="text">{{ contact.jobTitle }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Companies -->
+                        <div class="detail-section" *ngIf="companies.length > 0">
+                            <h4>Recent Companies</h4>
+                            <div class="data-list">
+                                <div class="data-item" *ngFor="let company of companies.slice(0, 5)">
+                                    <div class="item-title">{{ company.name }}</div>
+                                    <div class="item-details">
+                                        <div *ngIf="company.industry" class="detail-row">
+                                            <span class="text">{{ company.industry }}</span>
+                                        </div>
+                                        <div *ngIf="company.city" class="detail-row">
+                                            <span class="icon">📍</span>
+                                            <span class="text">{{ company.city }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Recent Deals -->
-                    <div class="detail-section" *ngIf="deals.length > 0">
-                        <h4>Recent Deals</h4>
-                        <div class="deal-list">
-                            <div class="deal-item" *ngFor="let deal of deals.slice(0, 5)">
-                                <div class="deal-name">{{ deal.dealName }}</div>
-                                <div class="deal-details">
-                                    <div *ngIf="deal.amount" class="detail-row">
-                                        <span class="icon">💰</span>
-                                        <span class="text">${{ deal.amount | number : "1.0-0" }}</span
-                    >
-                  </div>
-                  <div class="detail-row">
-                    <span class="icon">📊</span>
-                                        <span class="text">{{ deal.dealStage }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Companies -->
-                    <div class="detail-section" *ngIf="companies.length > 0">
-                        <h4>Recent Companies</h4>
-                        <div class="company-list">
-                            <div class="company-item" *ngFor="let company of companies.slice(0, 5)">
-                                <div class="company-name">{{ company.name }}</div>
-                                <div class="company-details">
-                                    <div *ngIf="company.industry" class="detail-row">
-                                        <span class="text">{{ company.industry }}</span>
-                                    </div>
-                                    <div *ngIf="company.city" class="detail-row">
-                                        <span class="icon">📍</span>
-                                        <span class="text">{{ company.city }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
-            <!-- END: HubSpot Section -->
-
-            <!-- Original Email List -->
-            <div class="email-list" *ngIf="!isLoadingEmails && emails.length > 0">
-                <div class="email-item" *ngFor="let email of emails" [class.unread]="!email.isRead">
-                    <div class="email-item-header">
-                        <span class="email-from">{{ email.fromEmail }}</span>
-                        <span class="email-date">{{
-              email.emailDate | date : "MMM d"
-            }}</span>
-                    </div>
-                    <div class="email-subject">{{ email.subject }}</div>
-                    <div class="email-snippet">{{ email.snippet }}</div>
-                </div>
-            </div>
-
-            <div class="email-loading" *ngIf="isLoadingEmails">
-                <div class="spinner-small"></div>
-                <p>Loading emails...</p>
-            </div>
-
-            <div class="email-empty" *ngIf="!isLoadingEmails && emails.length === 0 && syncStatus?.hasSynced">
-                <p>No emails found</p>
             </div>
         </div>
 
-        <!-- Messages Container -->
-        <div class="messages-wrapper" [class.sidebar-open]="showEmailPanel">
+        <!-- Messages Wrapper -->
+        <div class="messages-wrapper" [class.sidebar-open]="showDataPanel">
+            <!-- Messages Container -->
             <div class="messages-container" #messagesContainer>
                 <!-- Loading State -->
                 <div *ngIf="isLoading" class="loading-state">
@@ -310,7 +446,7 @@
             <div class="input-container">
                 <div class="input-wrapper">
                     <textarea [(ngModel)]="newMessage" (keypress)="onKeyPress($event)" placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)" rows="1" [disabled]="isSending" class="message-input"></textarea>
-                    <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending" [class.sending]="isSending">
+                    <button class="send-button" (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending" [class.sending]="isSending">
             <svg
               *ngIf="!isSending"
               width="20"
