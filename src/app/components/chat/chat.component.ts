@@ -118,6 +118,9 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   toggleCalendarList() {
     this.showCalendarList = !this.showCalendarList;
   }
+  goToInstructions() {
+    this.router.navigate(['/instructions']);
+  }
   /**
    * Load all cached data immediately for instant UI
    */
