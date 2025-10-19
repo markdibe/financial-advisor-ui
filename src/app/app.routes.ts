@@ -3,6 +3,7 @@ import { ChatComponent } from './components/chat/chat.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 import { HubspotCallbackComponent } from './components/hubspot-callback/hubspot-callback.component';
+import { InstructionsComponent } from './components/instructions/instructions.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -10,5 +11,6 @@ export const routes: Routes = [
   { path: 'auth/callback', component: AuthCallbackComponent },
   { path: 'auth/hubspot/callback', component: HubspotCallbackComponent },
   { path: 'chat', component: ChatComponent },
+  { path: 'instructions', component: InstructionsComponent },
   { path: '**', redirectTo: '/login' },
 ];

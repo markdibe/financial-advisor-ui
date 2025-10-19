@@ -1,0 +1,393 @@
+<div class="instructions-container">
+    <!-- Header -->
+    <div class="instructions-header">
+        <div class="header-left">
+            <button class="btn-back" (click)="goToChat()">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M19 12H5M12 19l-7-7 7-7"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        Back to Chat
+      </button>
+            <h1>🤖 AI Agent Instructions</h1>
+            <p class="subtitle">Tell your AI what to do automatically</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-activities" (click)="toggleActivitiesPanel()" [class.has-unread]="unreadActivitiesCount > 0">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M13.73 21a2 2 0 0 1-3.46 0"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span *ngIf="unreadActivitiesCount > 0" class="unread-badge">
+          {{ unreadActivitiesCount }}
+        </span>
+      </button>
+            <span class="user-email">{{ currentUser?.email }}</span>
+            <button class="btn-logout" (click)="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="instructions-content">
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <!-- Instructions Header -->
+            <div class="panel-header">
+                <h2>Your Instructions</h2>
+                <button class="btn-primary" (click)="openCreateModal()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          New Instruction
+        </button>
+            </div>
+
+            <!-- Instructions List -->
+            <div class="instructions-list" *ngIf="!isLoadingInstructions">
+                <!-- Empty State -->
+                <div class="empty-state" *ngIf="instructions.length === 0">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"
+              stroke-width="2"
+            />
+            <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round" />
+          </svg>
+                    <h3>No instructions yet</h3>
+                    <p>
+                        Create your first instruction to make your AI agent work automatically
+                    </p>
+                    <button class="btn-primary-large" (click)="openCreateModal()">
+            Create First Instruction
+          </button>
+                </div>
+
+                <!-- Instruction Cards -->
+                <div class="instruction-card" *ngFor="let instruction of instructions">
+                    <div class="card-header">
+                        <div class="card-title-section">
+                            <span class="trigger-badge">{{
+                getTriggerTypeLabel(instruction.triggerType)
+              }}</span>
+                            <span class="status-badge" [class.active]="instruction.isActive" [class.inactive]="!instruction.isActive">
+                {{ instruction.isActive ? "✓ Active" : "⏸ Paused" }}
+              </span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-icon" (click)="toggleInstruction(instruction)" title="Toggle active">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    *ngIf="instruction.isActive"
+                    d="M10 9v6m4-6v6m7-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+                    stroke-width="2"
+                  />
+                  <path
+                    *ngIf="!instruction.isActive"
+                    d="M8 5v14l11-7L8 5z"
+                    stroke-width="2"
+                  />
+                </svg>
+              </button>
+                            <button class="btn-icon" (click)="openEditModal(instruction)" title="Edit">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+                            <button class="btn-icon btn-delete" (click)="deleteInstruction(instruction)" title="Delete">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                    stroke-width="2"
+                  />
+                </svg>
+              </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="instruction-text">{{ instruction.instructionText }}</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="footer-stats">
+                            <span class="stat">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+                    stroke-width="2"
+                  />
+                </svg>
+                {{ instruction.createdAt | date : "MMM d, yyyy" }}
+              </span>
+                            <span class="stat" *ngIf="instruction.executionCount > 0">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    d="M22 12h-4l-3 9L9 3l-3 9H2"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Executed {{ instruction.executionCount }} times
+              </span>
+                            <span class="stat" *ngIf="instruction.lastExecutedAt">
+                Last run: {{ instruction.lastExecutedAt | date : "short" }}
+              </span>
+                        </div>
+                        <div class="priority-indicator" *ngIf="instruction.priority > 0">
+                            Priority: {{ instruction.priority }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" *ngIf="isLoadingInstructions">
+                <div class="spinner"></div>
+                <p>Loading instructions...</p>
+            </div>
+        </div>
+
+        <!-- Activities Panel -->
+        <div class="activities-panel" [class.open]="showActivitiesPanel">
+            <div class="panel-header">
+                <h2>🤖 Agent Activity</h2>
+                <button class="btn-close" (click)="toggleActivitiesPanel()">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+            </div>
+
+            <div class="activities-list" *ngIf="!isLoadingActivities">
+                <!-- Empty State -->
+                <div class="empty-state-small" *ngIf="activities.length === 0">
+                    <p>No activity yet</p>
+                    <small>Your AI agent will log actions here</small>
+                </div>
+
+                <!-- Activity Items -->
+                <div class="activity-item" *ngFor="let activity of activities" [class.unread]="!activity.isRead">
+                    <div class="activity-icon">
+                        {{ getActivityIcon(activity.activityType) }}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <span class="activity-type">{{ activity.activityType }}</span>
+                            <span class="activity-time">{{
+                activity.createdAt | date : "short"
+              }}</span>
+                        </div>
+                        <p class="activity-description">{{ activity.description }}</p>
+                        <div class="activity-status" [class.success]="activity.status === 'Success'" [class.failed]="activity.status === 'Failed'">
+                            {{ activity.status }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state-small" *ngIf="isLoadingActivities">
+                <div class="spinner-small"></div>
+                <p>Loading activities...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Instruction Modal -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Create New Instruction</h2>
+            <button class="btn-close-modal" (click)="closeCreateModal()">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M18 6L6 18M6 6l12 12"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Instruction</label>
+                <textarea [(ngModel)]="newInstruction.instructionText" placeholder="E.g., When someone emails about meetings, check my calendar and suggest available times" rows="4" class="form-input"></textarea>
+                <small class="form-hint">Describe what the AI should do automatically</small
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Trigger Source</label>
+        <select [(ngModel)]="newInstruction.triggerType" class="form-select">
+          <option *ngFor="let type of triggerTypes" [value]="type.value">
+            {{ type.label }}
+          </option>
+        </select>
+        <small class="form-hint">When should this instruction run?</small>
+            </div>
+
+            <div class="form-group">
+                <label>Priority (0-10)</label>
+                <input type="number" [(ngModel)]="newInstruction.priority" min="0" max="10" class="form-input" />
+                <small class="form-hint">Higher priority instructions run first</small>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+            <button class="btn-primary" (click)="createInstruction()" [disabled]="!newInstruction.instructionText.trim()">
+        Create Instruction
+      </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Instruction Modal -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Instruction</h2>
+            <button class="btn-close-modal" (click)="closeEditModal()">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            d="M18 6L6 18M6 6l12 12"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Instruction</label>
+                <textarea [(ngModel)]="editForm.instructionText" rows="4" class="form-input"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Trigger Source</label>
+                <select [(ngModel)]="editForm.triggerType" class="form-select">
+          <option *ngFor="let type of triggerTypes" [value]="type.value">
+            {{ type.label }}
+          </option>
+        </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority (0-10)</label>
+                <input type="number" [(ngModel)]="editForm.priority" min="0" max="10" class="form-input" />
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="editForm.isActive" />
+          <span>Active</span>
+        </label>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeEditModal()">Cancel</button>
+            <button class="btn-primary" (click)="updateInstruction()" [disabled]="!editForm.instructionText.trim()">
+        Save Changes
+      </button>
+        </div>
+    </div>
+</div>
